@@ -1,4 +1,4 @@
-# Project Title: OuterChat
+# OuterChat
 
 ## Overview
 
