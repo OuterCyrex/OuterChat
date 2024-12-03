@@ -1,0 +1,115 @@
+basePath: /
+definitions:
+  util.Response:
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 测试
+  title: OuterChat API文档
+  version: "1.0"
+paths:
+  /index:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - 首页
+  /user/add:
+    post:
+      parameters:
+      - description: 用户名
+        in: formData
+        name: name
+        type: string
+      - description: 电子邮箱
+        in: formData
+        name: email
+        type: string
+      - description: 密码
+        in: formData
+        name: password
+        type: string
+      - description: 重复密码
+        in: formData
+        name: repassword
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 添加用户
+      tags:
+      - 用户模块
+  /user/delete:
+    delete:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 删除用户
+      tags:
+      - 用户模块
+  /user/list:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 获取用户列表
+      tags:
+      - 用户模块
+  /user/loginByName:
+    get:
+      parameters:
+      - description: 用户名
+        in: query
+        name: name
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 根据用户名登陆
+      tags:
+      - 用户模块
+  /user/update:
+    put:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: integer
+      - description: 用户名
+        in: formData
+        name: name
+        type: string
+      - description: 密码
+        in: formData
+        name: password
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 修改用户
+      tags:
+      - 用户模块
+swagger: "2.0"
