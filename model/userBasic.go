@@ -42,7 +42,7 @@ func FindUserByField(Field string, data interface{}) (UserBasic, error) {
 	user := UserBasic{}
 	typeOf := reflect.TypeOf(&user).Elem()
 
-	if _, ok := typeOf.FieldByName(Field); ok {
+	if _, ok := typeOf.FieldByName(Field); ok || Field == "id" {
 		err := DB.Where(fmt.Sprintf("%s = ?", Field), data).First(&user).Error
 		if err != nil {
 			return UserBasic{}, err
@@ -64,4 +64,8 @@ func UpdateUser(user UserBasic) *gorm.DB {
 
 func LoginByName(username string, password string) *gorm.DB {
 	return DB.Model(&UserBasic{}).Where("Name = ? and Password = ?", username, password).First(&UserBasic{})
+}
+
+func GetUser(id uint) (UserBasic, error) {
+	return FindUserByField("id", id)
 }

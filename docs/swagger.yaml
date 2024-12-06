@@ -60,6 +60,51 @@ paths:
       summary: 删除用户
       tags:
       - 用户模块
+  /user/getFriendList:
+    get:
+      parameters:
+      - description: ID
+        in: query
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 获取用户的好友列表
+      tags:
+      - 好友
+  /user/getUser:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 通过用户ID获取用户对象
+      tags:
+      - 用户模块
+  /user/getUserByToken:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 解析用户token获取信息
+      tags:
+      - 用户模块
   /user/list:
     get:
       responses:

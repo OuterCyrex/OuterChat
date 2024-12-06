@@ -28,6 +28,47 @@ func GetUserList(c *gin.Context) {
 	c.JSON(http.StatusOK, util.SuccessHttpResponse(data))
 }
 
+// GetUserByToken
+// @Tags 用户模块
+// @Summary 解析用户token获取信息
+// @Param Authorization header string false "token"
+// @Success 200 {object} util.Response
+// @Router /user/getUserByToken [get]
+func GetUserByToken(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	claim, err := util.ParseToken(tokenString)
+	if err != nil {
+		util.SendErrorResponse(c, SError.IntervalError, fmt.Sprintf("token解析出错：%v", err))
+		return
+	}
+	user, err := model.FindUserByField("id", claim.UID)
+	if err != nil {
+		util.SendErrorResponse(c, SError.IntervalError, fmt.Sprintf("数据库查询出错：%v", err))
+		return
+	}
+	util.SendSuccessResponse(c, user)
+}
+
+// GetUser
+// @Tags 用户模块
+// @Summary 通过用户ID获取用户对象
+// @Param id query int false "id"
+// @Success 200 {object} util.Response
+// @Router /user/getUser [get]
+func GetUser(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Query("id"))
+	user, err := model.GetUser(uint(id))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			util.SendErrorResponse(c, SError.InValidIdError, "无效Id")
+			return
+		}
+		util.SendErrorResponse(c, SError.IntervalError, fmt.Sprintf("数据库查询出错: %v", err))
+		return
+	}
+	util.SendSuccessResponse(c, user)
+}
+
 // CreateUser
 // @Tags 用户模块
 // @Summary 添加用户
@@ -198,4 +239,8 @@ func MsgHandler(ws *websocket.Conn, c *gin.Context) {
 	if err != nil {
 		fmt.Printf("write message failed: %v", err)
 	}
+}
+
+func SendUserMsg(c *gin.Context) {
+	model.Chat(c.Writer, *c.Request)
 }

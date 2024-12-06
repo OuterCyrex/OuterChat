@@ -1,6 +1,7 @@
 package model
 
 import (
+	"OuterChat/util"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -14,6 +15,8 @@ type UserTypeValid interface {
 }
 
 type UserTypeValidImpl struct{}
+
+var TypeValid *UserTypeValidImpl
 
 func CheckUserValidByField(Field string, data interface{}) (bool, error) {
 	user := UserBasic{}
@@ -55,4 +58,13 @@ func (UserTypeValidImpl) CheckEmailValid(email string) bool {
 		return false
 	}
 	return ok
+}
+
+func CheckTokenValid(tokenString string) bool {
+	claims, err := util.ParseToken(tokenString)
+	if err != nil {
+		fmt.Printf("Parse Token Failed: %v", err)
+		return false
+	}
+	return TypeValid.CheckIdExist(int(claims.UID))
 }

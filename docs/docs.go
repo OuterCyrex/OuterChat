@@ -96,6 +96,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/getFriendList": {
+            "get": {
+                "tags": [
+                    "好友"
+                ],
+                "summary": "获取用户的好友列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/getUser": {
+            "get": {
+                "tags": [
+                    "用户模块"
+                ],
+                "summary": "通过用户ID获取用户对象",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/getUserByToken": {
+            "get": {
+                "tags": [
+                    "用户模块"
+                ],
+                "summary": "解析用户token获取信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/list": {
             "get": {
                 "tags": [
