@@ -72,6 +72,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/dealWithFriendRequest": {
+            "put": {
+                "tags": [
+                    "好友"
+                ],
+                "summary": "处理好友请求, status = 1 为'接受',status = 2 为 '拒绝'",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "申请ID",
+                        "name": "RequestId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "接受或拒绝",
+                        "name": "Status",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/delete": {
             "delete": {
                 "tags": [
@@ -107,6 +137,36 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "ID",
                         "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/getRequestWithOption": {
+            "get": {
+                "tags": [
+                    "好友"
+                ],
+                "summary": "获取好友请求, option = 1 为'收到的请求',option = 2 为 '发送的请求'",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "Id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "设置",
+                        "name": "Option",
                         "in": "query"
                     }
                 ],
@@ -202,6 +262,42 @@ const docTemplate = `{
                         "description": "密码",
                         "name": "password",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/pushFriendRequest": {
+            "post": {
+                "tags": [
+                    "好友"
+                ],
+                "summary": "发送好友请求",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "发送者ID",
+                        "name": "FromId",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "接收者ID",
+                        "name": "TargetId",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "描述",
+                        "name": "Desc",
+                        "in": "formData"
                     }
                 ],
                 "responses": {

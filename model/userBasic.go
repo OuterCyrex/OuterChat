@@ -29,13 +29,13 @@ func (table *UserBasic) TableName() string {
 
 // 用户列表查询
 
-func GetUserList() []UserBasic {
+func GetUserList() ([]UserBasic, error) {
 	var userList []UserBasic
 	err := DB.Model(&UserBasic{}).Find(&userList).Error
 	if err != nil {
-		fmt.Println("用户查询出错:", err)
+		return nil, err
 	}
-	return userList
+	return userList, nil
 }
 
 func FindUserByField(Field string, data interface{}) (UserBasic, error) {

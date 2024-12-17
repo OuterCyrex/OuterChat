@@ -8,16 +8,6 @@ import (
 	"reflect"
 )
 
-type UserTypeValid interface {
-	CheckIdExist(id int) bool
-	CheckNameValid(name string) bool
-	CheckEmailValid(email string) bool
-}
-
-type UserTypeValidImpl struct{}
-
-var TypeValid *UserTypeValidImpl
-
 func CheckUserValidByField(Field string, data interface{}) (bool, error) {
 	user := UserBasic{}
 	typeOf := reflect.TypeOf(&user).Elem()
@@ -32,7 +22,7 @@ func CheckUserValidByField(Field string, data interface{}) (bool, error) {
 	return false, errors.New("invalid field:" + Field)
 }
 
-func (UserTypeValidImpl) CheckIdExist(id int) bool {
+func CheckIdExist(id int) bool {
 	var user UserBasic
 	user.ID = uint(id)
 	err := DB.Where("ID = ?", id).First(&user).Error
@@ -42,7 +32,7 @@ func (UserTypeValidImpl) CheckIdExist(id int) bool {
 	return true
 }
 
-func (UserTypeValidImpl) CheckNameValid(name string) bool {
+func CheckNameValid(name string) bool {
 	ok, err := CheckUserValidByField("Name", name)
 	if err != nil {
 		fmt.Println("err: ", err)
@@ -51,7 +41,7 @@ func (UserTypeValidImpl) CheckNameValid(name string) bool {
 	return ok
 }
 
-func (UserTypeValidImpl) CheckEmailValid(email string) bool {
+func CheckEmailValid(email string) bool {
 	ok, err := CheckUserValidByField("Email", email)
 	if err != nil {
 		fmt.Println("err: ", err)
@@ -66,5 +56,5 @@ func CheckTokenValid(tokenString string) bool {
 		fmt.Printf("Parse Token Failed: %v", err)
 		return false
 	}
-	return TypeValid.CheckIdExist(int(claims.UID))
+	return CheckIdExist(int(claims.UID))
 }

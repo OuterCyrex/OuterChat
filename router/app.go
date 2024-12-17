@@ -26,6 +26,9 @@ func Router() *gin.Engine {
 	r.GET("/user/sendUserMsg", service.SendUserMsg)
 
 	r.GET("/user/getFriendList", service.GetFriendListById)
+	r.POST("/user/pushFriendRequest", service.PushFriendRequest)
+	r.PUT("/user/dealWithFriendRequest", service.DealWithFriendRequest)
+	r.GET("/user/getRequestWithOption", service.GetRequestWithOption)
 	gin.SetMode(gin.DebugMode)
 	return r
 }

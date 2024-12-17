@@ -15,17 +15,17 @@ import (
 	"time"
 )
 
-var TypeValid = model.UserTypeValidImpl{}
-
 // GetUserList
 // @Tags 用户模块
 // @Summary 获取用户列表
 // @Success 200 {object} util.Response
 // @Router /user/list [get]
 func GetUserList(c *gin.Context) {
-	var data []model.UserBasic
-	data = model.GetUserList()
-	c.JSON(http.StatusOK, util.SuccessHttpResponse(data))
+	data, err := model.GetUserList()
+	if err != nil {
+		util.SendErrorResponse(c, SError.IntervalError, err.Error())
+	}
+	util.SendSuccessResponse(c, data)
 }
 
 // GetUserByToken
@@ -90,14 +90,14 @@ func CreateUser(c *gin.Context) {
 	}
 
 	email := c.PostForm("email")
-	if !govalidator.IsEmail(email) || !TypeValid.CheckEmailValid(email) {
+	if !govalidator.IsEmail(email) || !model.CheckEmailValid(email) {
 		c.JSON(-1, util.ErrorHttpResponse(SError.InValidEmailError, "无效邮箱"))
 		c.Abort()
 		return
 	}
 
 	name := c.PostForm("name")
-	if !TypeValid.CheckNameValid(name) {
+	if !model.CheckNameValid(name) {
 		c.JSON(-1, util.ErrorHttpResponse(SError.NameHasBeenUsedError, "用户名已被使用"))
 		c.Abort()
 		return
@@ -130,7 +130,7 @@ func CreateUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	user := model.UserBasic{}
 	id, _ := strconv.Atoi(c.Query("id"))
-	if !TypeValid.CheckIdExist(id) {
+	if !model.CheckIdExist(id) {
 		c.JSON(-1, util.ErrorHttpResponse(SError.InValidIdError, "无效ID"))
 		c.Abort()
 		return
@@ -155,7 +155,7 @@ func DeleteUser(c *gin.Context) {
 // @Router /user/update [put]
 func UpdateUser(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Query("id"))
-	if !TypeValid.CheckIdExist(id) {
+	if !model.CheckIdExist(id) {
 		c.JSON(-1, util.ErrorHttpResponse(SError.InValidIdError, "无效ID"))
 		c.Abort()
 		return
@@ -184,7 +184,7 @@ func UpdateUser(c *gin.Context) {
 // @Router /user/loginByName [get]
 func LoginByName(c *gin.Context) {
 	name := c.Query("name")
-	if TypeValid.CheckNameValid(name) {
+	if model.CheckNameValid(name) {
 		util.SendErrorResponse(c, SError.NameNotExistError, "用户名不存在")
 		return
 	}
