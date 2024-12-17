@@ -126,6 +126,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/deleteFriend": {
+            "delete": {
+                "tags": [
+                    "好友"
+                ],
+                "summary": "删除好友",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户id",
+                        "name": "FromId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "目标id",
+                        "name": "TargetId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "Object"
+                        }
+                    }
+                }
+            }
+        },
         "/user/getFriendList": {
             "get": {
                 "tags": [

@@ -10,5 +10,12 @@ const (
 )
 
 const (
+	AlreadyFriendError = iota + 201
+	AlreadySendRequestError
+	FriendWithSelfError
+	NotEvenFriendError
+)
+
+const (
 	IntervalError = iota + 501
 )

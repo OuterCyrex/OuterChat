@@ -24,44 +24,6 @@ func (table *Contact) TableName() string {
 	return "contact"
 }
 
-func CoopCreate(tx *gorm.DB, OriginRequest Contact, OppositeRequest Contact) error {
-	err := tx.Save(&OriginRequest).Error
-	if err != nil {
-		return err
-	}
-	err = tx.Create(&OppositeRequest).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func CoopDelete(tx *gorm.DB, OriginRequest Contact, OppositeRequest Contact) error {
-	err := tx.Delete(&OriginRequest).Error
-	if err != nil {
-		return err
-	}
-	err = tx.Delete(&OppositeRequest).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func TransactionOperation(tx *gorm.DB, OriginRequest Contact, OppositeRequest Contact, opt func(*gorm.DB, Contact, Contact) error) error {
-	transaction := tx.Begin()
-	if transaction.Error != nil {
-		return transaction.Error
-	}
-	err := opt(transaction, OriginRequest, OppositeRequest)
-	if err != nil {
-		transaction.Rollback()
-		return err
-	}
-	transaction.Commit()
-	return nil
-}
-
 // Options pattern
 
 type Options func(*gorm.DB) *gorm.DB
@@ -72,17 +34,19 @@ func WithStatus(status int) Options {
 	}
 }
 
-func FindContactByCoopId(db *gorm.DB, FromId uint, TargetId uint, opt ...Options) Contact {
+func FindContactByCoopId(db *gorm.DB, FromId uint, TargetId uint, opt ...Options) (Contact, error) {
 	if FromId == TargetId {
-		return Contact{}
+		return Contact{}, xerrors.Errorf("Same Ids for From and Target")
 	}
 	for _, opt := range opt {
 		db = opt(db)
 	}
 	var Result Contact
-	db.Model(&Contact{}).Where("owner_id = ? and target_id = ?", FromId, TargetId).First(&Result)
-	return Result
+	err := db.Model(&Contact{}).Where("owner_id = ? and target_id = ?", FromId, TargetId).First(&Result).Error
+	return Result, err
 }
+
+// Others
 
 func GetFriendListById(id uint) ([]UserBasic, error) {
 	var contacts []Contact
@@ -102,8 +66,14 @@ func GetFriendListById(id uint) ([]UserBasic, error) {
 	return FriendList, nil
 }
 
+func IsFriendStatus(FromId uint, TargetId uint, opt Options) bool {
+	if _, err := FindContactByCoopId(DB, FromId, TargetId, opt); errors.Is(err, gorm.ErrRecordNotFound) {
+		return false
+	}
+	return true
+}
+
 func PushFriendRequest(FromId uint, TargetId uint, Desc string) (Contact, error) {
-	FindContactByCoopId(DB, FromId, TargetId)
 	WaitingRequest := Contact{
 		OwnerId:  FromId,
 		TargetId: TargetId,
@@ -150,10 +120,9 @@ func DealWithFriendRequest(ContactId uint, Status int) (Contact, error) {
 	default:
 		return Contact{}, xerrors.Errorf("Invalid status: %d", Status)
 	}
-	err := DB.Where("id = ?", ContactId).Find(&FriendRequest).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return Contact{}, xerrors.Errorf("Invalid FriendRequest ID: %d", ContactId)
-	} else if err != nil {
+
+	err := DB.Model(&Contact{}).Where("id = ? and status = ?", ContactId, Waiting).First(&FriendRequest).Error
+	if err != nil {
 		return Contact{}, err
 	}
 	FriendRequest.Status = Status
@@ -164,7 +133,18 @@ func DealWithFriendRequest(ContactId uint, Status int) (Contact, error) {
 		Status:   Accept,
 	}
 
-	err = TransactionOperation(DB, FriendRequest, OppositeRequest, CoopCreate)
+	tx := DB.Begin()
+	err = tx.Save(&FriendRequest).Error
+	if err != nil {
+		tx.Rollback()
+		return Contact{}, err
+	}
+	err = tx.Create(&OppositeRequest).Error
+	if err != nil {
+		tx.Rollback()
+		return Contact{}, err
+	}
+	err = tx.Commit().Error
 	if err != nil {
 		return Contact{}, err
 	}
@@ -182,7 +162,19 @@ func DeleteFriend(FromId uint, TargetId uint) error {
 	if err != nil {
 		return err
 	}
-	err = TransactionOperation(DB, contact, oppositeContact, CoopDelete)
+
+	tx := DB.Begin()
+	err = tx.Delete(&contact).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Delete(&oppositeContact).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit().Error
 	if err != nil {
 		return err
 	}

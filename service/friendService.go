@@ -4,8 +4,10 @@ import (
 	"OuterChat/model"
 	"OuterChat/util"
 	"OuterChat/util/SError"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -36,6 +38,22 @@ func GetFriendListById(c *gin.Context) {
 func PushFriendRequest(c *gin.Context) {
 	FromId, _ := strconv.Atoi(c.PostForm("FromId"))
 	TargetId, _ := strconv.Atoi(c.PostForm("TargetId"))
+
+	if TargetId == FromId {
+		util.SendErrorResponse(c, SError.FriendWithSelfError, "不可添加自己为好友")
+		return
+	}
+
+	if model.IsFriendStatus(uint(FromId), uint(TargetId), model.WithStatus(model.Waiting)) {
+		util.SendErrorResponse(c, SError.AlreadySendRequestError, "已发送过请求")
+		return
+	}
+
+	if model.IsFriendStatus(uint(FromId), uint(TargetId), model.WithStatus(model.Accept)) {
+		util.SendErrorResponse(c, SError.AlreadyFriendError, "已与对方是好友")
+		return
+	}
+
 	desc := c.PostForm("Desc")
 	if !(model.CheckIdExist(FromId) && model.CheckIdExist(TargetId)) {
 		util.SendErrorResponse(c, SError.InValidIdError, "无效 ID")
@@ -60,6 +78,10 @@ func DealWithFriendRequest(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Query("RequestId"))
 	status, _ := strconv.Atoi(c.PostForm("Status"))
 	contact, err := model.DealWithFriendRequest(uint(id), status)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		util.SendErrorResponse(c, SError.InValidIdError, "无效 ID")
+		return
+	}
 	if err != nil {
 		util.SendErrorResponse(c, SError.IntervalError, err.Error())
 		return
@@ -85,7 +107,24 @@ func GetRequestWithOption(c *gin.Context) {
 	util.SendSuccessResponse(c, Result)
 }
 
-// DeleteFriendRequest
+// DeleteFriend
 // @Tags 好友
-// @Summary 删除好友请求
-// @
+// @Summary 删除好友
+// @Param FromId query int false "用户id"
+// @Param TargetId query int false "目标id"
+// @Success 200 {Object} util.Response
+// @Router /user/deleteFriend [delete]
+func DeleteFriend(c *gin.Context) {
+	FromId, _ := strconv.Atoi(c.Query("FromId"))
+	TargetId, _ := strconv.Atoi(c.Query("TargetId"))
+	err := model.DeleteFriend(uint(FromId), uint(TargetId))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		util.SendErrorResponse(c, SError.NotEvenFriendError, "尚且未与其添加好友")
+		return
+	}
+	if err != nil {
+		util.SendErrorResponse(c, SError.IntervalError, err.Error())
+		return
+	}
+	util.SendSuccessResponse(c, nil)
+}
