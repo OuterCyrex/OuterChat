@@ -26,7 +26,7 @@ var (
 
 func LoadDatabase(file *ini.File) {
 	DbUser = file.Section("database").Key("DbUser").MustString("root")
-	DbPassword = file.Section("database").Key("DbPassword").MustString("Outer233")
+	DbPassword = file.Section("database").Key("DbPassword").MustString("***")
 	DbHost = file.Section("database").Key("DbHost").MustString("127.0.0.1")
 	DbPort = file.Section("database").Key("DbPort").MustString("3306")
 	DbName = file.Section("database").Key("DbName").MustString("outerchat")
