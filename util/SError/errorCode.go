@@ -18,4 +18,5 @@ const (
 
 const (
 	IntervalError = iota + 501
+	InvalidTokenError
 )

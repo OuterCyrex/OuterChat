@@ -90,6 +90,12 @@ const docTemplate = `{
                         "description": "接受或拒绝",
                         "name": "Status",
                         "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -114,6 +120,12 @@ const docTemplate = `{
                         "description": "id",
                         "name": "id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -144,6 +156,12 @@ const docTemplate = `{
                         "description": "目标id",
                         "name": "TargetId",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -168,6 +186,12 @@ const docTemplate = `{
                         "description": "ID",
                         "name": "id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -198,6 +222,12 @@ const docTemplate = `{
                         "description": "设置",
                         "name": "Option",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -258,12 +288,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/history": {
+            "get": {
+                "tags": [
+                    "用户模块"
+                ],
+                "summary": "获取用户与某人的的聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "FromId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "目标ID",
+                        "name": "TargetId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user/list": {
             "get": {
                 "tags": [
                     "用户模块"
                 ],
                 "summary": "获取用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -328,6 +402,12 @@ const docTemplate = `{
                         "description": "描述",
                         "name": "Desc",
                         "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {
@@ -364,6 +444,12 @@ const docTemplate = `{
                         "description": "密码",
                         "name": "password",
                         "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "Authorization",
+                        "in": "header"
                     }
                 ],
                 "responses": {

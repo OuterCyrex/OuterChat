@@ -56,6 +56,10 @@ paths:
         in: formData
         name: Status
         type: integer
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -70,6 +74,10 @@ paths:
       - description: id
         in: query
         name: id
+        type: string
+      - description: token
+        in: header
+        name: Authorization
         type: string
       responses:
         "200":
@@ -90,6 +98,10 @@ paths:
         in: query
         name: TargetId
         type: integer
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -105,6 +117,10 @@ paths:
         in: query
         name: id
         type: integer
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -124,6 +140,10 @@ paths:
         in: query
         name: Option
         type: integer
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -162,8 +182,36 @@ paths:
       summary: 解析用户token获取信息
       tags:
       - 用户模块
+  /user/history:
+    get:
+      parameters:
+      - description: 用户ID
+        in: query
+        name: FromId
+        type: integer
+      - description: 目标ID
+        in: query
+        name: TargetId
+        type: integer
+      - description: token
+        in: header
+        name: Authorization
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.Response'
+      summary: 获取用户与某人的的聊天记录
+      tags:
+      - 用户模块
   /user/list:
     get:
+      parameters:
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -206,6 +254,10 @@ paths:
         in: formData
         name: Desc
         type: string
+      - description: token
+        in: header
+        name: Authorization
+        type: string
       responses:
         "200":
           description: OK
@@ -228,6 +280,10 @@ paths:
       - description: 密码
         in: formData
         name: password
+        type: string
+      - description: token
+        in: header
+        name: Authorization
         type: string
       responses:
         "200":

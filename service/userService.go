@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
@@ -18,6 +17,7 @@ import (
 // GetUserList
 // @Tags 用户模块
 // @Summary 获取用户列表
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/list [get]
 func GetUserList(c *gin.Context) {
@@ -125,6 +125,7 @@ func CreateUser(c *gin.Context) {
 // @Summary 删除用户
 // @Tags 用户模块
 // @Param id query string false "id"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/delete [delete]
 func DeleteUser(c *gin.Context) {
@@ -151,6 +152,7 @@ func DeleteUser(c *gin.Context) {
 // @Param id query int false "id"
 // @Param name formData string false "用户名"
 // @Param password formData string false "密码"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/update [put]
 func UpdateUser(c *gin.Context) {
@@ -204,43 +206,33 @@ func LoginByName(c *gin.Context) {
 	util.SendSuccessResponse(c, token)
 }
 
-var upGrade = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-// websocket test:https://www.qianbo.com.cn/Tool/WebSocket/
-
-func SendMsg(c *gin.Context) {
-	ws, err := upGrade.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		fmt.Printf("websocket upgrade failed: %v", err)
-	}
-	defer func(ws *websocket.Conn) {
-		err = ws.Close()
-		if err != nil {
-			fmt.Printf("close websocket conn failed: %v", err)
-		}
-	}(ws)
-
-	MsgHandler(ws, c)
-}
-
-func MsgHandler(ws *websocket.Conn, c *gin.Context) {
-	msg, err := model.Subscribe(c, model.PublishKey)
-	if err != nil {
-		fmt.Printf("Redis Subscribe failed: %v", err)
-	}
-
-	formatTime := time.Now().Format("2006-01-02 15:04:05")
-	m := fmt.Sprintf("[ws][%s]:%s", formatTime, msg)
-	err = ws.WriteMessage(1, []byte(m))
-	if err != nil {
-		fmt.Printf("write message failed: %v", err)
-	}
-}
-
 func SendUserMsg(c *gin.Context) {
 	model.Chat(c.Writer, *c.Request)
+}
+
+// GetHistory
+// @Summary 获取用户与某人的的聊天记录
+// @Tags 用户模块
+// @Param FromId query int false "用户ID"
+// @Param TargetId query int false "目标ID"
+// @Param Authorization header string false "token"
+// @Success 200 {object} util.Response
+// @Router /user/history [get]
+func GetHistory(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Query("FromId"))
+	targetId, _ := strconv.Atoi(c.Query("TargetId"))
+	if !(model.CheckIdExist(userId) && model.CheckIdExist(targetId)) {
+		util.SendErrorResponse(c, SError.InValidIdError, "无效 ID")
+		return
+	}
+	if !model.IsFriendStatus(uint(userId), uint(targetId), model.WithStatus(model.Accept)) {
+		util.SendErrorResponse(c, SError.NotEvenFriendError, "与对方尚且不是好友")
+		return
+	}
+	history, err := model.GetHistory(uint(userId), uint(targetId))
+	if err != nil {
+		util.SendErrorResponse(c, SError.IntervalError, err.Error())
+		return
+	}
+	util.SendSuccessResponse(c, history)
 }

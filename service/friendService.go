@@ -15,6 +15,7 @@ import (
 // @Tags 好友
 // @Summary 获取用户的好友列表
 // @Param id query int false "ID"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/getFriendList [get]
 func GetFriendListById(c *gin.Context) {
@@ -33,6 +34,7 @@ func GetFriendListById(c *gin.Context) {
 // @Param FromId formData int false "发送者ID"
 // @Param TargetId formData int false "接收者ID"
 // @Param Desc formData string false "描述"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/pushFriendRequest [post]
 func PushFriendRequest(c *gin.Context) {
@@ -72,6 +74,7 @@ func PushFriendRequest(c *gin.Context) {
 // @Summary 处理好友请求, status = 1 为'接受',status = 2 为 '拒绝'
 // @Param RequestId query int false "申请ID"
 // @Param Status formData int false "接受或拒绝"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/dealWithFriendRequest [put]
 func DealWithFriendRequest(c *gin.Context) {
@@ -94,6 +97,7 @@ func DealWithFriendRequest(c *gin.Context) {
 // @Summary 获取好友请求, option = 1 为'收到的请求',option = 2 为 '发送的请求'
 // @Param Id query int false "用户ID"
 // @Param Option query int false "设置"
+// @Param Authorization header string false "token"
 // @Success 200 {object} util.Response
 // @Router /user/getRequestWithOption [get]
 func GetRequestWithOption(c *gin.Context) {
@@ -112,6 +116,7 @@ func GetRequestWithOption(c *gin.Context) {
 // @Summary 删除好友
 // @Param FromId query int false "用户id"
 // @Param TargetId query int false "目标id"
+// @Param Authorization header string false "token"
 // @Success 200 {Object} util.Response
 // @Router /user/deleteFriend [delete]
 func DeleteFriend(c *gin.Context) {

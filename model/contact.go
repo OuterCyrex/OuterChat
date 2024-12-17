@@ -69,6 +69,8 @@ func GetFriendListById(id uint) ([]UserBasic, error) {
 func IsFriendStatus(FromId uint, TargetId uint, opt Options) bool {
 	if _, err := FindContactByCoopId(DB, FromId, TargetId, opt); errors.Is(err, gorm.ErrRecordNotFound) {
 		return false
+	} else if err != nil {
+		return false
 	}
 	return true
 }
@@ -153,12 +155,11 @@ func DealWithFriendRequest(ContactId uint, Status int) (Contact, error) {
 }
 
 func DeleteFriend(FromId uint, TargetId uint) error {
-	contact, oppositeContact := Contact{}, Contact{}
-	err := DB.Model(&Contact{}).Where("owner_id = ? and target_id = ? and status = ?", FromId, TargetId, Accept).First(&contact).Error
+	contact, err := FindContactByCoopId(DB, FromId, TargetId, WithStatus(Accept))
 	if err != nil {
 		return err
 	}
-	err = DB.Model(&Contact{}).Where("owner_id = ? and target_id = ? and status = ?", TargetId, FromId, Accept).First(&oppositeContact).Error
+	oppositeContact, err := FindContactByCoopId(DB, TargetId, FromId, WithStatus(Accept))
 	if err != nil {
 		return err
 	}

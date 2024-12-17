@@ -24,11 +24,14 @@ type Message struct {
 	Amount   int
 }
 
+type History struct {
+	From []Message
+	To   []Message
+}
+
 // Type
 const (
 	private = iota + 1
-	group
-	broad
 )
 
 // Media
@@ -81,7 +84,7 @@ func Chat(writer http.ResponseWriter, request http.Request) {
 	rwMutex.Unlock()
 
 	go sendProc(node)
-	go recvProc(node)
+	go recvProc(userId, node)
 
 	SendMsg(uint(userId), []byte("欢迎来到聊天室"))
 }
@@ -99,7 +102,7 @@ func sendProc(node *Node) {
 	}
 }
 
-func recvProc(node *Node) {
+func recvProc(userId int, node *Node) {
 	for {
 		_, data, err := node.Conn.ReadMessage()
 		if err != nil {
@@ -107,17 +110,19 @@ func recvProc(node *Node) {
 			return
 		}
 		fmt.Println("[Receive-Data]:", string(data))
-		dispatch(data)
+		dispatch(userId, data)
 	}
 }
 
-func dispatch(data []byte) {
+func dispatch(userId int, data []byte) {
 	msg := Message{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
 		fmt.Printf("unmarshal failed: %v", err)
 		return
 	}
+	msg.FromId = uint(userId)
+	DB.Create(&msg)
 	switch msg.Type {
 	case 1:
 		SendMsg(msg.TargetId, data)
@@ -133,4 +138,17 @@ func SendMsg(targetId uint, msg []byte) {
 	if ok {
 		node.DataQueue <- msg
 	}
+}
+
+func GetHistory(userId uint, targetId uint) (History, error) {
+	var history History
+	err := DB.Model(&Message{}).Where("from_id = ? and target_id = ?", userId, targetId).Find(&history.From).Error
+	if err != nil {
+		return History{}, err
+	}
+	err = DB.Model(&Message{}).Where("target_id = ? and from_id = ?", userId, targetId).Find(&history.To).Error
+	if err != nil {
+		return History{}, err
+	}
+	return history, nil
 }
